@@ -16,6 +16,11 @@
   body {
     @apply bg-stone-100 text-stone-800 antialiased;
     font-family: var(--font-sans);
+    /* Respect notch / status-bar safe areas (0 when not under a safe area) */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
   [data-theme="dark"] body {
     @apply bg-stone-950 text-stone-100;
