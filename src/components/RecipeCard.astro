@@ -1,0 +1,76 @@
+---
+import { Icon } from 'astro-icon/components';
+import ToolTag from './ToolTag.astro';
+import MacroBar from './MacroBar.astro';
+
+interface Props {
+  title: string;
+  tools: string[];
+  ingredients: string[];
+  calories: number;
+  protein: number;
+}
+const { title, tools, ingredients, calories, protein } = Astro.props;
+---
+
+<article
+  class="flex h-full flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-white/10 dark:bg-stone-900"
+>
+  <div class="flex flex-1 flex-col gap-4 p-4">
+    <!-- header -->
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <h2 class="text-lg font-bold leading-snug text-stone-900 dark:text-stone-50">
+        {title}
+      </h2>
+      {
+        tools.length > 0 && (
+          <div class="flex flex-wrap gap-1.5">
+            {tools.map((t) => <ToolTag name={t} />)}
+          </div>
+        )
+      }
+    </div>
+
+    <!-- ingredients -->
+    {
+      ingredients.length > 0 && (
+        <div>
+          <div class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
+            <Icon name="lucide:shopping-basket" class="h-3.5 w-3.5" aria-hidden="true" />
+            食材
+          </div>
+          <ul class="space-y-1">
+            {ingredients.map((ing) => (
+              <li class="flex items-start gap-2 text-sm text-stone-700 dark:text-stone-300">
+                <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+                <span>{ing}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    <!-- steps (rendered markdown) -->
+    <details class="group mt-auto rounded-xl bg-stone-50 dark:bg-white/[0.04]">
+      <summary
+        class="flex cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-stone-700 select-none dark:text-stone-200"
+      >
+        <span class="flex items-center gap-1.5">
+          <Icon name="lucide:chef-hat" class="h-4 w-4 text-amber-500" aria-hidden="true" />
+          做法步骤
+        </span>
+        <Icon
+          name="lucide:chevron-down"
+          class="h-4 w-4 text-stone-400 transition-transform group-open:rotate-180"
+          aria-hidden="true"
+        />
+      </summary>
+      <div class="steps px-3 pb-3 pt-0 text-sm text-stone-700 dark:text-stone-300">
+        <slot />
+      </div>
+    </details>
+  </div>
+
+  <MacroBar calories={calories} protein={protein} />
+</article>

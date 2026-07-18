@@ -1,0 +1,141 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import Layout from '../layouts/Layout.astro';
+import CategoryFilter from '../components/CategoryFilter.astro';
+import RecipeCard from '../components/RecipeCard.astro';
+
+// Category metadata (order = display order).
+const CATS = [
+  { key: 'breakfast', label: '早餐', icon: 'lucide:sunrise' },
+  { key: 'meal', label: '正餐', icon: 'lucide:utensils' },
+  { key: 'snack', label: '宵夜', icon: 'lucide:moon' },
+] as const;
+
+const recipes = await getCollection('recipes');
+
+// Pre-render each recipe body (做法步骤) once, keep entry + its <Content />.
+const items = await Promise.all(
+  recipes.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  }),
+);
+
+const countFor = (key: string) =>
+  items.filter((i) => i.entry.data.category === key).length;
+
+const cats = CATS.map((c) => ({ ...c, count: countFor(c.key) }));
+const active = 'breakfast';
+
+// Ordered by category so DOM order matches the tabs.
+const ordered = CATS.flatMap((c) =>
+  items
+    .filter((i) => i.entry.data.category === c.key)
+    .sort((a, b) => a.entry.data.title.localeCompare(b.entry.data.title, 'zh')),
+);
+---
+
+<Layout>
+  <div class="mx-auto max-w-3xl px-4 pb-16 pt-5">
+    <!-- header -->
+    <header class="mb-4 flex items-start justify-between gap-3">
+      <div>
+        <h1 class="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50">
+          <Icon name="lucide:utensils-crossed" class="h-6 w-6 text-amber-500" aria-hidden="true" />
+          增肌美食记录
+        </h1>
+        <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+          KAUST · 快速决策 · 高蛋白 · 免看管
+        </p>
+      </div>
+      <button
+        id="theme-toggle"
+        type="button"
+        aria-label="切换深浅色"
+        class="shrink-0 rounded-full border border-stone-200 bg-white p-2.5 text-stone-600 transition-colors hover:border-amber-300 hover:text-amber-600 dark:border-white/10 dark:bg-stone-900 dark:text-stone-300"
+      >
+        <Icon name="lucide:sun" class="hidden h-5 w-5 dark:block" aria-hidden="true" />
+        <Icon name="lucide:moon" class="h-5 w-5 dark:hidden" aria-hidden="true" />
+      </button>
+    </header>
+
+    <CategoryFilter cats={cats} active={active} />
+
+    <!-- cards -->
+    <main class="mt-5">
+      <div id="recipe-grid" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {
+          ordered.map(({ entry, Content }) => (
+            <div data-category={entry.data.category} class:list={[{ hidden: entry.data.category !== active }]}>
+              <RecipeCard
+                title={entry.data.title}
+                tools={entry.data.tools}
+                ingredients={entry.data.ingredients}
+                calories={entry.data.calories}
+                protein={entry.data.protein}
+              >
+                <Content />
+              </RecipeCard>
+            </div>
+          ))
+        }
+
+        {
+          cats
+            .filter((c) => c.count === 0)
+            .map((c) => (
+              <div
+                data-category={c.key}
+                class:list={['md:col-span-2', { hidden: c.key !== active }]}
+              >
+                <div class="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-stone-300 bg-white/50 px-6 py-14 text-center dark:border-white/15 dark:bg-white/[0.02]">
+                  <Icon name={c.icon} class="h-8 w-8 text-stone-300 dark:text-stone-600" aria-hidden="true" />
+                  <p class="text-sm font-medium text-stone-500 dark:text-stone-400">
+                    「{c.label}」还没有菜谱
+                  </p>
+                  <p class="max-w-xs text-xs text-stone-400 dark:text-stone-500">
+                    在 <code class="rounded bg-stone-100 px-1 dark:bg-white/10">src/content/recipes/{c.key}/</code> 里新建一个 .md 文件即可自动出现。
+                  </p>
+                </div>
+              </div>
+            ))
+        }
+      </div>
+    </main>
+
+    <footer class="mt-10 text-center text-xs text-stone-400 dark:text-stone-600">
+      纯 Markdown 驱动 · 增删 .md 文件即可更新菜谱
+    </footer>
+  </div>
+</Layout>
+
+<script>
+  // --- category filter ---
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const cards = document.querySelectorAll<HTMLElement>('#recipe-grid [data-category]');
+
+  function applyFilter(key: string) {
+    for (const el of cards) {
+      el.classList.toggle('hidden', el.dataset.category !== key);
+    }
+    for (const b of buttons) {
+      b.setAttribute('aria-selected', b.dataset.filter === key ? 'true' : 'false');
+    }
+  }
+
+  for (const b of buttons) {
+    b.addEventListener('click', () => applyFilter(b.dataset.filter!));
+  }
+
+  // --- theme toggle ---
+  const toggle = document.getElementById('theme-toggle');
+  toggle?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('diet.theme', next);
+    } catch (e) {}
+  });
+</script>

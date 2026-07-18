@@ -1,0 +1,32 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+
+// Map a cooking tool (Chinese label) to the closest Lucide icon.
+// Lucide has no exact air-fryer / blender icons — these are nearest matches.
+// Edit this map freely to add tools or swap icons.
+const TOOL_ICONS: Record<string, string> = {
+  空气炸锅: 'lucide:cooking-pot',
+  破壁机: 'lucide:blend',
+  料理机: 'lucide:blend',
+  平底锅: 'lucide:cooking-pot',
+  汤锅: 'lucide:soup',
+  '平底锅/汤锅': 'lucide:soup',
+  微波炉: 'lucide:microwave',
+  烤箱: 'lucide:oven',
+  电饭煲: 'lucide:cooking-pot',
+};
+
+const icon = TOOL_ICONS[name] ?? 'lucide:chef-hat';
+---
+
+<span
+  class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300"
+>
+  <Icon name={icon} class="h-3.5 w-3.5" aria-hidden="true" />
+  {name}
+</span>

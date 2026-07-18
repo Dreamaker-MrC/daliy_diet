@@ -1,0 +1,54 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  calories: number;
+  protein: number;
+}
+const { calories, protein } = Astro.props;
+
+// Share of calories coming from protein (4 kcal per gram), for the little bar.
+const proteinPct = calories > 0
+  ? Math.min(100, Math.round(((protein * 4) / calories) * 100))
+  : 0;
+---
+
+<div class="border-t border-stone-200 bg-stone-50/60 px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+  <div class="flex items-stretch">
+    <div class="flex flex-1 items-center gap-2">
+      <Icon name="lucide:flame" class="h-5 w-5 text-amber-500" aria-hidden="true" />
+      <div class="leading-tight">
+        <div class="text-base font-bold tabular-nums text-stone-900 dark:text-stone-50">
+          {calories}
+        </div>
+        <div class="text-[11px] uppercase tracking-wide text-stone-500 dark:text-stone-400">
+          kcal
+        </div>
+      </div>
+    </div>
+
+    <div class="mx-1 w-px bg-stone-200 dark:bg-white/10"></div>
+
+    <div class="flex flex-1 items-center justify-end gap-2">
+      <div class="text-right leading-tight">
+        <div class="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+          {protein}<span class="text-xs font-semibold"> g</span>
+        </div>
+        <div class="text-[11px] uppercase tracking-wide text-stone-500 dark:text-stone-400">
+          protein
+        </div>
+      </div>
+      <Icon name="lucide:beef" class="h-5 w-5 text-emerald-500" aria-hidden="true" />
+    </div>
+  </div>
+
+  <!-- protein-share bar -->
+  <div class="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-amber-200/70 dark:bg-amber-500/20">
+    <div
+      class="h-full rounded-full bg-emerald-500 dark:bg-emerald-400"
+      style={`width:${proteinPct}%`}
+      title={`蛋白质约占热量 ${proteinPct}%`}
+    >
+    </div>
+  </div>
+</div>
