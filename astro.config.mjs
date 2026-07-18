@@ -7,7 +7,7 @@ import icon from 'astro-icon';
 export default defineConfig({
   // GitHub Pages: project site served at https://<owner>.github.io/<repo>/
   site: 'https://dreamaker-mrc.github.io',
-  base: '/kaust-diet-app',
+  base: '/daliy_diet',
   integrations: [icon()],
   vite: {
     plugins: [tailwindcss()],
