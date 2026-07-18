@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
+# NOTE: This Actions-based deploy is disabled for auto-run because the account's
+# billed Actions minutes are currently locked (custom Actions fail with a billing
+# error). Deployment is done via the gh-pages branch + GitHub's free built-in
+# builder instead. Re-enable the `push` trigger once the billing lock is cleared.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
